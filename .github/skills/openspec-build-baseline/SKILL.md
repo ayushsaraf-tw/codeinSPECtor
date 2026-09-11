@@ -46,6 +46,23 @@ entry_points_count: <number>
 
 ---
 
+### Note for PHASE 2 & 3: File Threshold Guardrail & Recursive Slicing
+
+**File Budget Threshold:** Maximum 5 source files per single analysis pass.
+
+Before analyzing any capability:
+1. Count the target source files associated with the capability.
+2. **If Target Files > 5:**
+    - **DO NOT** read all files at once.
+    - Automatically split the capability into sub-capabilities based on execution stages:
+        - `CAP-XXXa (Validation & Request Parsing)` -> Reads Controller, DTOs, Annotation classes.
+        - `CAP-XXXb (Core Business Domain Logic)` -> Reads Service, Strategy, Model classes.
+        - `CAP-XXXc (Persistence & Event Mutation)` -> Reads Repository, Entity, SQL Migrations.
+    - Update `openspec/specs/CAPABILITIES_TREE.md` with these newly created sub-slices.
+    - Prompt User: *"Capability `<id>` spans `<N>` files. I have split it into child slices (`CAP-XXXa`, `CAP-XXXb`, `CAP-XXXc`) to keep accuracy high. Proceeding with `CAP-XXXa` first."*
+3. **If Target Files ≤ 5:**
+    - Proceed directly with thin-slice analysis.
+
 ### PHASE 2: Capability Tree Setup / Update
 **Condition:** `SYSTEM_MAP.md` EXISTS, but `openspec/specs/CAPABILITIES_TREE.md` DOES NOT EXIST.
 
