@@ -1,0 +1,15 @@
+{
+  "name": "codeinspector",
+  "version": "1.0.0",
+  "description": "OpenSpec Reverse Engineering Engine for Legacy Codebases",
+  "main": "bin/cli.js",
+  "bin": {
+    "codeinspector": "bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["openspec", "reverse-engineering", "copilot", "claude-code"],
+  "author": "",
+  "license": "ISC"
+}

@@ -17,10 +17,12 @@ openspec init
 
 ### 2. Run the Baseline Builder
 In your AI Assistant Chat (Copilot Chat, Cursor, Claude Code, etc.), run one of the following commands:
-```text
-/opsx:build-baseline            <-- Run the Comprehensive Baseline Builder
-/opsx:build-baseline ignore files and folders with `v1` tag             <-- Run the basic Baseline Builder
+```bash
+/opsx:build-baseline  #Build Baseline Specifications without using the `v1` tagged files and folders
+````
 
+```bash
+/opsx:build-baseline-comprehensive #Build Baseline Specifications while using the `v1` tagged files and folders
 ```
 
 ---
