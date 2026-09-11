@@ -1,91 +1,94 @@
-# CodeinSPECtor — OpenSpec Baseline Generator
+# 🔍 CodeinSPECtor
 
-**CodeinSPECtor** is a stateful, human-in-the-loop reverse-engineering skill for OpenSpec. It analyzes legacy codebases (regardless of architecture or stack) and extracts structured, evidence-grounded specifications into a single canonical source-of-truth.
-
-It uses an **"Analyze once, represent once, render many ways"** approach while strictly preserving LLM context windows through recursive capability slicing.
+**CodeinSPECtor** is an OpenSpec-native reverse-engineering engine for legacy codebases. It provides a stateful, human-in-the-loop workflow (`/opsx:build-baseline`) that extracts evidence-grounded specifications into a single source of truth without overflowing LLM context windows.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start for Legacy Repositories
 
-### 1. Prerequisites
-Ensure you have installed OpenSpec globally:
+Any team working on a legacy repository can set up `codeinSPECtor` in seconds with **zero configuration**.
+
+### Step 1: Open Your Target Legacy Repository Terminal
+Navigate to the root directory of the legacy codebase you want to reverse-engineer:
+
 ```bash
-npm install -g openspec
-openspec init
+cd /path/to/your-legacy-repo
 ```
-
-### 2. Run the Baseline Builder
-In your AI Assistant Chat (Copilot Chat, Cursor, Claude Code, etc.), run one of the following commands:
-```bash
-/opsx:build-baseline  #Build Baseline Specifications without using the `v1` tagged files and folders
-````
+### Step 2: Initialize codeinSPECtor
+Run this single command in your terminal:
 
 ```bash
-/opsx:build-baseline-comprehensive #Build Baseline Specifications while using the `v1` tagged files and folders
+npx git+https://github.com/ayushsaraf-tw/codeinSPECtor.git init
 ```
+(Note: If the repo is private, ensure your Git SSH credentials are configured).
 
----
+This command automatically:
+  - Initializes OpenSpec in the legacy repository if it isn't already present.
+  - Injects the /opsx:build-baseline skill across your local agent directories (.openspec/, .agents/, .claude/, .github/).
 
-## 🔄 The Interactive 4-Phase Pipeline
+### Step 3: Run the Reverse-Engineering Engine
+Open your preferred AI Assistant Chat (VS Code Copilot, Cursor, Claude Code, etc.) inside the legacy repository and run:
 
-CodeinSPECtor works in four stateful, human-in-the-loop phases. Progress is saved after every step so you can pause, review, or resume at any time.
+Plaintext
+/opsx:build-baseline
+🔄 The 4-Phase Baseline Workflow
+codeinSPECtor runs in four interactive, human-in-the-loop phases. It pauses after each phase so you can inspect progress, refine output, or pause work.
 
-```text
+```Plaintext
 Phase 1: System Map
-│
-▼
-Phase 2: Capabilities Tree Setup
-│
-▼
+       │
+       ▼
+Phase 2: Capability Tree & Slicing
+       │
+       ▼
 Phase 3: Thin-Slice Capability Analysis (Iterative)
-│
-▼
-Phase 4: Baseline, Dependency Map & RAID Aggregation
+       │
+       ▼
+Phase 4: Baseline, Dependency Map & RAID Consolidation
 ```
 
-### Phase 1: System Reconnaissance
-* **Command:** `/opsx:build-baseline`
-* **Output:** `openspec/specs/SYSTEM_MAP.md`
-* **What it does:** Scans top-level directory structures, build configs, and DB migrations to build an entry-point inventory without reading deep application logic.
+1. **Phase 1** — System Reconnaissance (SYSTEM_MAP.md)
+Scans build files, directory structures, and DB migrations to create a lightweight inventory of entry points without loading complex application code.
 
-### Phase 2: Capability Slicing
-* **Command:** `/opsx:build-baseline`
-* **Output:** `openspec/specs/CAPABILITIES_TREE.md`
-* **What it does:** Groups discovered routes into logical capabilities (`CAP-001`, `CAP-002`). Large flows (>3 endpoints or >500 LOC) are flagged to be decomposed into sub-slices (`CAP-001a`, `CAP-001b`).
+2. **Phase 2** — Capability Tree (CAPABILITIES_TREE.md)
+Groups entry points into logical business capabilities (CAP-001, CAP-002). Large flows (>3 endpoints or >4 source files) are automatically flagged to be decomposed into sub-slices (CAP-001a, CAP-001b) to protect context window limits.
 
-### Phase 3: Thin-Slice Analysis
-* **Command:** `/opsx:build-baseline <CAP-ID>`
-* **Output:** `openspec/specs/<capability-slug>.md`
-* **What it does:** Reads **only** the target source files for a single capability to keep context windows minimal (< 30% utilization). Extracts:
-    - Domain Glossaries & Business Impact
-    - Entry Points & Security Gates
-    - Database Schema Mutations & SQL Changes
-    - Gherkin BDD Scenarios (`Given/When/Then`)
-    - Error & Failure Matrices with File/Line evidence citations
+3. **Phase 3** — Thin-Slice Capability Analysis (<capability-slug>.md)
+Analyzes source code files for a single capability slice at a time. Generates canonical OpenSpec files containing:
+   - Domain Glossaries & Business Purpose 
+   - Security Gates & Authentication Logic 
+   - Database Schema Mutations & Table Impacts 
+   - Behavior Scenarios in Gherkin (Given / When / Then)
+   - Failure & Error Matrices with exact source file/line citations
 
-### Phase 4: Baseline Consolidation
-* **Command:** `/opsx:build-baseline aggregate`
-* **Outputs:**
-    - `openspec/specs/BASELINE.md` (Merged master specification)
-    - `openspec/specs/DEPENDENCY_MAP.md` (Cross-feature call graph & shared DB mutations)
-    - `openspec/specs/RAID_LOG.md` (Aggregated Risks, Assumptions, Issues & Tech Debt)
-
+4. **Phase 4** — Master Aggregation (BASELINE.md)
+Aggregates all completed thin-slice specs into three master artifacts:
+   - openspec/specs/BASELINE.md: Merged system-wide specification. 
+   - openspec/specs/DEPENDENCY_MAP.md: Cross-feature call graph and shared database state mutations. 
+   - openspec/specs/RAID_LOG.md: Consolidated technical debt, concurrency risks, assumptions, and code smells.
 ---
+## 📂 Generated Workspace Structure
+Once executed, specifications are saved under the standard OpenSpec paths in your repository:
 
-## 📂 OpenSpec Directory Structure
-
-```text
-.
+```Plaintext
+your-legacy-repo/
 ├── .openspec/
 │   └── skills/
-│       └── build/
-│           └── SKILL.md                 <-- Custom /opsx:build-baseline skill file
+│       └── build-baseline/
+│           └── SKILL.md            <-- codeinSPECtor skill definition
 └── openspec/
     └── specs/
-        ├── SYSTEM_MAP.md                <-- Discovered entry points & modules
-        ├── CAPABILITIES_TREE.md         <-- Capability index & completion status
-        ├── BASELINE.md                  <-- Master consolidated baseline
-        ├── DEPENDENCY_MAP.md            <-- Inter-feature coupling & call graph
-        ├── RAID_LOG.md                  <-- Technical debt & risk catalog
-        └── <capability-slug>.md         <-- Individual thin-slice specifications
+        ├── SYSTEM_MAP.md           <-- Discovered entry points & components
+        ├── CAPABILITIES_TREE.md    <-- Capability index & execution status
+        ├── BASELINE.md             <-- Consolidated system baseline
+        ├── DEPENDENCY_MAP.md       <-- Inter-feature coupling & call graph
+        ├── RAID_LOG.md             <-- Aggregated risks, assumptions & tech debt
+        └── <capability-slug>.md    <-- Thin-slice capability specifications
+```
+---     
+## 💡Resuming & Updating Work
+**CodeinSPECtor is completely stateful:**
+
+**Partial Builds:** You can reverse-engineer 2 out of 5 capabilities today, run Phase 4 aggregation, and have a valid baseline for those 2 capabilities.
+
+**Incremental Continuation:** When you return days later to analyze capability 3, /opsx:build-baseline detects completed capabilities, skips re-analyzing them, and appends new work directly into BASELINE.md, DEPENDENCY_MAP.md, and RAID_LOG.md.
