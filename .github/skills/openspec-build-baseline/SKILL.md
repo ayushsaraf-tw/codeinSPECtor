@@ -1,7 +1,7 @@
-# OpenSpec Custom Skill: /opsx:build
+# OpenSpec Custom Skill: /opsx:build-baseline
 
 ## Command
-/opsx:build
+/opsx:build-baseline
 
 ## Description
 Stateful, human-in-the-loop reverse engineering skill for OpenSpec. Builds baseline specifications incrementally, generates cross-capability dependency maps, catalogs RAID risks, and maintains a valid OpenSpec source-of-truth.
