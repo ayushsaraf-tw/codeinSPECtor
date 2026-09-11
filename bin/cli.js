@@ -27,10 +27,10 @@ const skillContent = fs.readFileSync(templatePath, 'utf8');
 
 // 3. Define target skill folders across major AI tools
 const targetDirectories = [
-  path.join('.openspec', 'skills', 'build-baseline'),
-  path.join('.agents', 'skills', 'build-baseline'),
-  path.join('.claude', 'skills', 'build-baseline'),
-  path.join('.github', 'skills', 'build-baseline')
+  path.join('.openspec', 'skills', 'openspec-build-baseline'),
+  path.join('.agents', 'skills', 'openspec-build-baseline'),
+  path.join('.claude', 'skills', 'openspec-build-baseline'),
+  path.join('.github', 'skills', 'openspec-build-baseline')
 ];
 
 // 4. Inject the skill into all configuration paths
@@ -43,4 +43,4 @@ targetDirectories.forEach(dir => {
 
 console.log("\n🎉 codeinSPECtor setup complete!");
 console.log("👉 Next Step: Open your AI Assistant Chat and run:");
-console.log("   /opsx:build-baseline OR /opsx:build-baseline-comprhensive\n");
+console.log("   /opsx:build-baseline\n");

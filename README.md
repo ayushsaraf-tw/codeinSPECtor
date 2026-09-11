@@ -29,8 +29,9 @@ This command automatically:
 ### Step 3: Run the Reverse-Engineering Engine
 Open your preferred AI Assistant Chat (VS Code Copilot, Cursor, Claude Code, etc.) inside the legacy repository and run:
 
-Plaintext
+```Plaintext
 /opsx:build-baseline
+```
 🔄 The 4-Phase Baseline Workflow
 codeinSPECtor runs in four interactive, human-in-the-loop phases. It pauses after each phase so you can inspect progress, refine output, or pause work.
 

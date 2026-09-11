@@ -1,9 +1,7 @@
 # OpenSpec Custom Skill: /opsx:build-baseline
 
 ## Command
-**/opsx:build-baseline** → Build Baseline Specifications without using the `v1` tagged files and folders
-
-**/opsx:build-baseline-comprehensive** → Build Baseline Specifications while using the `v1` tagged files and folders
+/opsx:build-baseline
 
 ## Description
 Stateful, human-in-the-loop reverse engineering skill for OpenSpec. Builds baseline specifications incrementally, generates cross-capability dependency maps, catalogs RAID risks, and maintains a valid OpenSpec source-of-truth.
