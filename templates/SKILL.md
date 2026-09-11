@@ -1,3 +1,13 @@
+---
+name: build-baseline
+description: Interactive 4-phase OpenSpec baseline reverse-engineering engine.
+command: /opsx:build-baseline
+---
+
+# OpenSpec Custom Skill: /opsx:build-baseline
+
+## Description
+Stateful, human-in-the-loop reverse engineering skill for OpenSpec...
 # OpenSpec Custom Skill: /opsx:build-baseline
 
 ## Command
