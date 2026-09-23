@@ -1,15 +1,25 @@
 {
   "name": "codeinspector",
-  "version": "1.0.0",
-  "description": "OpenSpec Reverse Engineering Engine for Legacy Codebases",
+  "version": "1.3.0",
+  "description": "Framework-agnostic OpenSpec reverse-engineering and baseline engine with C4 diagrams, privacy gates, and multi-stakeholder views.",
   "main": "bin/cli.js",
   "bin": {
     "codeinspector": "bin/cli.js"
   },
   "scripts": {
+    "build": "node create_template.js",
+    "prepack": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["openspec", "reverse-engineering", "copilot", "claude-code"],
+  "keywords": [
+    "openspec",
+    "reverse-engineering",
+    "c4-diagrams",
+    "bdd",
+    "copilot",
+    "claude-code",
+    "cursor"
+  ],
   "author": "",
   "license": "ISC"
 }
