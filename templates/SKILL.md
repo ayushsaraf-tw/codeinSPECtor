@@ -1,6 +1,6 @@
 ---
 name: build-baseline
-description: Interactive 4-phase OpenSpec baseline engine with adaptive ecosystem detection, nested capability slicing, C4 architecture diagrams, multi-stakeholder views, confidence scoring, line citations, zero-leakage privacy gates and automated change proposals.
+description: Interactive 4-phase OpenSpec baseline engine with adaptive ecosystem detection, nested capability slicing, C4 architecture diagrams, multi-stakeholder views, confidence scoring, line citations, zero-leakage privacy gates, and automated change proposals.
 command: /opsx:build-baseline
 ---
 
@@ -75,7 +75,7 @@ entry_points_count: <number>
 
 ## Discovered Entry Points
 - `<protocol/type> <path/event/command>` -> `<Handler/Function>` (`file:lines`)
-  ```
+```
 
 **Human Prompt (STOP HERE):**
 > "Phase 1 Complete: System Map written to `openspec/specs/SYSTEM_MAP.md`.
@@ -91,9 +91,9 @@ entry_points_count: <number>
 1. Read `SYSTEM_MAP.md` and adopt specific conventions of the **`detected_ecosystem`**.
 2. Group discovered entry points into business capabilities using semantic IDs: `cap-XXX-<short-business-slug>` (e.g., `cap-001-user-auth`).
 3. **Nested Slicing Rule:** If a capability touches >4 source files, split it into child sub-slices nested under the parent domain folder:
-   - **Parent Overview Spec:** `openspec/specs/cap-001-user-auth/spec.md` (Domain purpose, entry points router, and sub-slice directory index)
-   - **Child Sub-Slice 1:** `openspec/specs/cap-001-user-auth/cap-001a-token-validation/spec.md`
-   - **Child Sub-Slice 2:** `openspec/specs/cap-001-user-auth/cap-001b-session-persistence/spec.md`
+    - **Parent Overview Spec:** `openspec/specs/cap-001-user-auth/spec.md` (Domain purpose, entry points router, and sub-slice directory index)
+    - **Child Sub-Slice 1:** `openspec/specs/cap-001-user-auth/cap-001a-token-validation/spec.md`
+    - **Child Sub-Slice 2:** `openspec/specs/cap-001-user-auth/cap-001b-session-persistence/spec.md`
 4. If a capability touches $\le$ 4 files, create a single spec at `openspec/specs/cap-XXX-<slug>/spec.md`.
 5. Write initial index to `openspec/specs/CAPABILITIES_TREE.md`.
 
@@ -118,6 +118,24 @@ entry_points_count: <number>
 - Ensure all Markdown tables have NO blank lines between header, divider, and data rows (`|---|---|---||`).
 - Embed a **Mermaid C4 Component Diagram** tailored to the detected stack architecture.
 
+**Frontmatter Field Rules:**
+- `type`: Must be `capability_specification` (or `capability_proposal` for change proposals).
+- `capability_id`: Unique semantic ID matching the directory name (e.g., `cap-001-user-auth` or `cap-001a-jwt-validation`).
+- `capability_name`: Human-readable title describing the business function (e.g., `User Authentication & Token Validation`).
+- `version`: Semantic version string of this spec (e.g., `1.0.0`). Increment patch for minor edits, minor for structural updates.
+- `status`: Execution state. Must be one of `[completed, pending_approval]`. Set to `pending_approval` if `confidence_level` is `needs_confirmation` or `unverified`.
+- `confidence_level`: Evidence strength. Must be one of `[confirmed, needs_confirmation, unverified]`.
+    - `confirmed`: Fully verified with exact source code file:line citations.
+    - `needs_confirmation`: Partially inferred from incomplete files or ambiguous routing.
+    - `unverified`: Generated with unconfirmed assumptions.
+- `confidence_score`: Integer percentage string between `0%` and `100%` reflecting certainty of the analysis.
+- `unverified_assumptions`: Array of string descriptions listing any unconfirmed code behaviors, missing third-party dependencies, or implicit framework defaults (e.g., `["Assumes default token expiration of 3600s"]`). Must be `[]` if empty.
+- `stability`: Architectural health of the source code. Must be one of `[stable, deprecated, flaky]`.
+- `created_at`: Creation date formatted as ISO 8601 date string (`YYYY-MM-DD`).
+- `created_by`: Name of the agent or developer executing the analysis (default: `codeinSPECtor`).
+- `linked_capabilities`: Array of related capability IDs directly coupled via service calls, events, or shared DB tables (e.g., `[cap-002-user-profile, cap-005-audit-log]`). Must be `[]` if none.
+- `linked_issues`: Array of ticket IDs, GitHub issues, or RAID risk IDs associated with this capability (e.g., `[SEC-102, JIRA-404]`). Must be `[]` if none.
+
 **Spec Output Template:**
 ```markdown
 ---
@@ -125,12 +143,12 @@ type: capability_specification
 capability_id: cap-001-user-auth
 capability_name: User Authentication & Token Validation
 version: 1.0.0
-status: completed                    # [completed | pending_approval]
-confidence_level: confirmed          # [confirmed | needs_confirmation | unverified]
+status: completed
+confidence_level: confirmed
 confidence_score: 95%
 unverified_assumptions: []
-stability: stable                    # [stable | deprecated | flaky]
-created_at: 2026-09-21
+stability: stable
+created_at: 2026-09-23
 created_by: codeinSPECtor
 linked_capabilities: [cap-002-user-profile]
 linked_issues: []
@@ -192,6 +210,8 @@ mermaid diagram ends here```
 ### PHASE 4: Baseline Consolidation, Master C4 & Native Change Proposals
 **Condition:** User requests **'aggregate'**, **'build baseline'**, or **'proposal <feature-name>'**.
 
+**Fast-Track Rule:** If `openspec/specs/INDEX.md` already exists and user requests `proposal <feature-name>`, BYPASS Phase 1–3 and jump directly to Option B.
+
 #### Option A: Baseline Aggregation & Master Artifacts
 1. Traverse all `openspec/specs/` subdirectories and read completed specs.
 2. **Generate Master System C4 Diagram:**
@@ -208,15 +228,15 @@ mermaid diagram ends here```
    - **Consolidated Behavior Scenarios:** All Gherkin BDD scenarios grouped by capability.
    - **Global Failure & Error Matrix:** Merged table of all status codes, exceptions, and trigger conditions.
 
-#### Option B: Native Change Proposal Generation (`proposal <feature-name>`)
-When user executes `proposal <feature-name>`, the agent MUST:
-1. Normalize `<feature-name>` to lowercase kebab-case (e.g., `user-mfa-support`).
-2. Create standard OpenSpec change directory structure:
-    - `openspec/changes/<kebab-name>/proposal.md`
-    - `openspec/changes/<kebab-name>/design.md`
-    - `openspec/changes/<kebab-name>/tasks.md`
-    - `openspec/changes/<kebab-name>/specs/` (Directory for target capability spec deltas)
-3. Auto-populate templates using context from `openspec/specs/INDEX.md` and `SYSTEM_MAP.md`.
+#### Option B: Automated OpenSpec Proposal Generation (`proposal <feature-name>`)
+When user executes `proposal <feature-name>` (e.g., `proposal add-mfa`):
+1. **Normalize Name:** Convert `<feature-name>` to lowercase kebab-case (`openspec/changes/<kebab-name>/`).
+2. **Read Baseline Context:** Inspect `openspec/specs/INDEX.md` and `SYSTEM_MAP.md` to identify existing capabilities affected by this proposal.
+3. **Autonomously Scaffold & Draft Files:**
+   - `openspec/changes/<kebab-name>/proposal.md` $\rightarrow$ Auto-draft executive summary, scope, and check off impacted baseline capabilities.
+   - `openspec/changes/<kebab-name>/design.md` $\rightarrow$ Auto-draft architectural delta and target schema/API mutations.
+   - `openspec/changes/<kebab-name>/tasks.md` $\rightarrow$ Generate step-by-step developer checklist.
+   - `openspec/changes/<kebab-name>/specs/<affected-cap>/spec.md` $\rightarrow$ Generate target delta capability spec stubs with proposed BDD scenarios.
 
 **Human Prompt & Action Routing (STOP HERE):**
 > "🎉 OpenSpec Execution Complete!
@@ -235,7 +255,7 @@ When user executes `proposal <feature-name>`, the agent MUST:
 ---
 
 ### OPTIONAL PHASE: Multi-Stakeholder View Generation
-**Condition:** User requests **'render <view-type>'** after baseline aggregation.
+**Condition:** User requests **'render <view-type>'** after baseline aggregation or proposal creation.
 
 **Action:** Render customized, audience-specific perspectives derived strictly from `BASELINE.md` and `SYSTEM_C4_DIAGRAM.md`:
 - **`render client` / `render ba`:** Renders non-technical business executive summary, user impact, compliance rules, and plain-language Gherkin scenarios (hides internal code/file citations).
