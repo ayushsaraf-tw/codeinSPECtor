@@ -1,13 +1,13 @@
 ---
 name: build-baseline
-description: Interactive 4-phase OpenSpec baseline engine with adaptive ecosystem detection, nested capability slicing, C4 architecture diagrams, multi-stakeholder views, confidence scoring, line citations, and zero-leakage privacy gates.
+description: Interactive 4-phase OpenSpec baseline engine with adaptive ecosystem detection, nested capability slicing, C4 architecture diagrams, multi-stakeholder views, confidence scoring, line citations, zero-leakage privacy gates and automated change proposals.
 command: /opsx:build-baseline
 ---
 
 # OpenSpec Custom Skill: /opsx:build-baseline
 
 ## Description
-Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs broad, framework-agnostic system reconnaissance, locks in the detected stack, and generates nested capability specifications with evidence-grounded confidence metrics, line-level code citations, C4 architecture diagrams, central navigation indices, dependency maps, RAID logs, and multi-stakeholder view renderings while enforcing pre-flight privacy guardrails.
+Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs broad, framework-agnostic system reconnaissance, locks in the detected stack, and generates nested capability specifications with evidence-grounded confidence metrics, line-level code citations, C4 architecture diagrams, central navigation indices, dependency maps, RAID logs, multi-stakeholder view renderings, and native OpenSpec change proposals while enforcing pre-flight privacy guardrails.
 
 ---
 
@@ -189,10 +189,10 @@ mermaid diagram ends here```
 
 ---
 
-### PHASE 4: Baseline Consolidation, Master C4 & Multi-View Rendering
-**Condition:** User requests **'aggregate'** or **'build baseline'**.
+### PHASE 4: Baseline Consolidation, Master C4 & Native Change Proposals
+**Condition:** User requests **'aggregate'**, **'build baseline'**, or **'proposal <feature-name>'**.
 
-**Action:**
+#### Option A: Baseline Aggregation & Master Artifacts
 1. Traverse all `openspec/specs/` subdirectories and read completed specs.
 2. **Generate Master System C4 Diagram:**
    - Synthesize component interactions across completed capabilities into a master system C4 Context/Container diagram saved at `openspec/specs/SYSTEM_C4_DIAGRAM.md`.
@@ -208,9 +208,19 @@ mermaid diagram ends here```
    - **Consolidated Behavior Scenarios:** All Gherkin BDD scenarios grouped by capability.
    - **Global Failure & Error Matrix:** Merged table of all status codes, exceptions, and trigger conditions.
 
+#### Option B: Native Change Proposal Generation (`proposal <feature-name>`)
+When user executes `proposal <feature-name>`, the agent MUST:
+1. Normalize `<feature-name>` to lowercase kebab-case (e.g., `user-mfa-support`).
+2. Create standard OpenSpec change directory structure:
+    - `openspec/changes/<kebab-name>/proposal.md`
+    - `openspec/changes/<kebab-name>/design.md`
+    - `openspec/changes/<kebab-name>/tasks.md`
+    - `openspec/changes/<kebab-name>/specs/` (Directory for target capability spec deltas)
+3. Auto-populate templates using context from `openspec/specs/INDEX.md` and `SYSTEM_MAP.md`.
+
 **Human Prompt & Action Routing (STOP HERE):**
-> "🎉 OpenSpec Aggregation Complete!
-> Updated Master Artifacts:
+> "🎉 OpenSpec Execution Complete!
+> Updated Master Artifacts / Proposals:
 > - `openspec/specs/INDEX.md` (Master navigation index, confidence status & C4 links)
 > - `openspec/specs/SYSTEM_C4_DIAGRAM.md` (Master architecture C4 diagram)
 > - `openspec/specs/BASELINE.md` (Merged system baseline, global glossary & error matrix)
@@ -220,7 +230,7 @@ mermaid diagram ends here```
 > **Next Steps - Choose an Option:**
 > 1. Type a remaining pending capability ID to continue reverse-engineering.
 > 2. Type **'render <client | architect | developer | agent>'** to generate a customized stakeholder view.
-> 3. Type **'proposal <feature-name>'** to set up a new change proposal template under `openspec/changes/`."
+> 3. Type **'proposal <feature-name>'** to set up a new native OpenSpec change proposal under `openspec/changes/`."
 
 ---
 
