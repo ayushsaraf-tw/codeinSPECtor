@@ -4,25 +4,24 @@ const path = require('path');
 const partsDir = path.join(__dirname, 'templates', 'parts');
 
 const partFiles = [
-  '01_privacy_guardrails.md',
-  '02_fastpath_proposals.md',
-  '03_phase1_recon.md',
-  '04_phase2_slicing.md',
-  '05_phase3_analysis.md',
-  '06_phase4_aggregation.md',
-  '07_stakeholder_views.md'
+  'privacy_guardrails.md',
+  'phase1_recon.md',
+  'phase2_slicing.md',
+  'phase3_analysis.md',
+  'phase4_aggregation.md',
+  'stakeholder_views.md'
 ];
 
 const header = `---
 name: build-baseline
-description: Interactive 4-phase OpenSpec baseline engine with adaptive ecosystem detection, nested capability slicing, C4 architecture diagrams, multi-stakeholder views, confidence scoring, line citations, zero-leakage privacy gates, and automated change proposals.
+description: Interactive 4-phase OpenSpec baseline engine with adaptive ecosystem detection, nested capability slicing, C4 architecture diagrams, multi-stakeholder views, confidence scoring, line citations, and zero-leakage privacy gates.
 command: /opsx:build-baseline
 ---
 
 # OpenSpec Custom Skill: /opsx:build-baseline
 
 ## Description
-Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs broad, framework-agnostic system reconnaissance, locks in the detected stack, generates nested capability specifications, multi-stakeholder views, and native OpenSpec change proposals while enforcing pre-flight privacy guardrails.
+Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs broad, framework-agnostic system reconnaissance, locks in the detected stack, generates nested capability specifications, C4 diagrams, and multi-stakeholder views while enforcing pre-flight privacy guardrails.
 
 ---
 
