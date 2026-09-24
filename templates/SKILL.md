@@ -124,12 +124,12 @@ entry_points_count: <number>
      > Do you want to **re-analyze** and overwrite it, or **skip** and choose another capability?
 ## 2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
 ## 3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
-## 4. **Dynamic Diagram Selection Rule (Mandatory C4 + Contextual Diagrams):**
-   - **Always Include:** C4 Component Architecture Diagram (System & Module boundaries).
-   - **If Data Persistence Included:** Append Mermaid **ER Diagram** (Entities, relationships, primary/foreign keys).
-   - **If Multi-Service / Async / Event / API Handshake Included:** Append Mermaid **Sequence Diagram** (Inbound trigger, middleware, domain logic, external calls, async worker).
-   - **If Complex Business Logic / Feature Toggles Included:** Append Mermaid **Flowchart** (Decision trees, branch paths, failure states).
-   - **Circular & Shared Boundary Handling:** When analyzing `CAP-A`, if it calls `CAP-B` and `CAP-B` calls `CAP-A`, DO NOT analyze `CAP-B` source code inline. Treat `CAP-B` as an external boundary call in Section 3 (Sequence Diagram), record `cyclic_dependencies: ["CAP-B"]` in frontmatter, and log the coupling in `RAID_LOG.md`. For `cap-000-*` infrastructure utilities, list them in `linked_capabilities` without re-analyzing utility source code.
+## 4. **Dynamic Diagram Selection Rule (Include Diagrams Wherever Required):**
+   - **C4 Component Architecture Diagram:** Include if the capability involves distinct component layers, adapters, or structural system boundaries.
+   - **Sequence Diagram:** Include if multi-step API flows, async events, multi-service communications, or 3rd-party integration handshakes exist.
+   - **ER Diagram:** Include if data persistence, tables, or ORM entity relationships are touched.
+   - **Flowchart:** Include if complex branching logic, decision trees, or feature flag paths exist.
+   - **Circular & Shared Boundary Handling:** When analyzing \`CAP-A\`, if it calls \`CAP-B\` and \`CAP-B\` calls \`CAP-A\`, DO NOT analyze \`CAP-B\` source code inline. Treat \`CAP-B\` as an external boundary call in Section 3 (Sequence Diagram), record \`cyclic_dependencies: ["CAP-B"]\` in frontmatter, and log the coupling in \`RAID_LOG.md\`. For \`cap-000-*\` infrastructure utilities, list them in \`linked_capabilities\` without re-analyzing utility source code.
 
 ## 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
 

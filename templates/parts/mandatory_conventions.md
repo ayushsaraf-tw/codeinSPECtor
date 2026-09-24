@@ -32,11 +32,14 @@
     - Evaluate well-maintained alternatives (high commit frequency, active issue resolution) before selecting a library.
 
 ## 5. Visual Documentation & Diagrams
-- **Mandatory Visuals:** For any task or proposal involving state changes, multi-service communication, database updates, or sequence flows, embed Mermaid diagrams directly into `design.md`:
-    - **C4 Component Diagrams:** For system/module boundaries.
-    - **Sequence Diagrams:** For API calls, event pipelines, or state transitions.
-    - **ER Diagrams:** For schema mutations or entity relationship updates.
-    - **Flowcharts:** For complex decision trees or feature toggle branch paths.
+- **System-Level Architecture (Phase 4):** A C4 System Context/Container diagram is MANDATORY at the master system level (`SYSTEM_C4_DIAGRAM.md`).
+- **Contextual Thin-Slice Diagrams (Phase 3 & Proposals):** Generate diagrams **wherever required** based on capability complexity:
+  - **C4 Component Diagrams:** Structural boundaries, adapters, or multi-component modules.
+  - **Sequence Diagrams:** Multi-step API flows, 3rd-party integrations, or async event handshakes.
+  - **ER Diagrams:** Database mutations, ORM schemas, or entity relationships.
+  - **Flowcharts:** Branching business logic, decision trees, or feature toggle paths.
+  - **UI State & Hierarchy Diagrams:** Frontend component hierarchies, React/Redux store flows, or UI state transitions.
+  - **Event Broker Topologies:** Kafka/RabbitMQ topics, queue consumers, and dead-letter pipeline flows.
 
 ## 6. Architectural Dependencies, Utilities & Cyclic Coupling
 - **Infrastructure / Shared Utilities (`cap-000-*`):** Common helpers, ORM base models, middleware, and shared utility modules MUST be extracted as `cap-000-common-<slug>` capabilities. Domain capabilities reference them via frontmatter (`linked_capabilities`) rather than re-analyzing their internal code.
