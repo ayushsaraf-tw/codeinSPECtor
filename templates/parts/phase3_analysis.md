@@ -1,17 +1,23 @@
-### PHASE 3: Thin-Slice Analysis (Stack-Tailored Analysis & C4 Diagrams)
+### PHASE 3: Thin-Slice Analysis (Stack-Tailored Analysis & Dynamic Multi-Diagrams)
 **Condition:** User selects a capability ID from `CAPABILITIES_TREE.md`.
 
 **Action:**
-1. **State Guard:** Check selected capability status in `CAPABILITIES_TREE.md`.
-    - **IF ALREADY COMPLETED:** HALT EXECUTION AND ASK:
-      > 🛑 **STATE GUARD:** Capability `<id>` is currently marked as **Completed**.
-      > Do you want to **re-analyze** and overwrite it, or **skip** and choose another capability?
-2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
-3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
-4. Generate target `spec.md` using exact code line citations and embedded Mermaid C4 diagrams:
+# 1. **State Guard:** Check selected capability status in `CAPABILITIES_TREE.md`.
+   - **IF ALREADY COMPLETED:** HALT EXECUTION AND ASK:
+     > 🛑 **STATE GUARD:** Capability `<id>` is currently marked as **Completed**.
+     > Do you want to **re-analyze** and overwrite it, or **skip** and choose another capability?
+# 2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
+# 3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
+# 4. **Dynamic Diagram Selection Rule (Mandatory C4 + Contextual Diagrams):**
+   - **Always Include:** C4 Component Architecture Diagram (System & Module boundaries).
+   - **If Data Persistence Included:** Append Mermaid **ER Diagram** (Entities, relationships, primary/foreign keys).
+   - **If Multi-Service / Async / Event / API Handshake Included:** Append Mermaid **Sequence Diagram** (Inbound trigger, middleware, domain logic, external calls, async worker).
+   - **If Complex Business Logic / Feature Toggles Included:** Append Mermaid **Flowchart** (Decision trees, branch paths, failure states).
+
+# 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
 
 **Frontmatter Field Rules:**
-- `type`: Must be `capability_specification` (or `capability_proposal` for proposals).
+- `type`: Must be `capability_specification`.
 - `capability_id`: Unique semantic ID matching the directory name (e.g., `cap-001-user-auth`).
 - `capability_name`: Human-readable title describing the business function.
 - `version`: Semantic version string (e.g., `1.0.0`).
@@ -25,7 +31,9 @@
 - `linked_capabilities`: Array of directly coupled capability IDs (e.g., `[cap-002-user-profile]`). Must be `[]` if none.
 - `linked_issues`: Array of associated ticket/issue IDs (e.g., `[SEC-102]`). Must be `[]` if none.
 
-**Spec Output Template starts here:**
+**Spec Output Template:**
+
+[//]: # (template starts)
 ```yaml
 ---
 type: capability_specification
@@ -37,41 +45,88 @@ confidence_level: confirmed
 confidence_score: 95%
 unverified_assumptions: []
 stability: stable
-created_at: 2026-09-23
+created_at: 2026-09-24
 created_by: codeinSPECtor
 linked_capabilities: [cap-002-user-profile]
 linked_issues: []
 ---
 ```
-# Capability: User Authentication & Token Validation
+
+# Capability: <Capability Name>
 
 ## 1. Domain Purpose & Business Intent
 <High-level business capability summary>
 
 ## 2. Technical Entry Points & Security Gates
-- **Interface / Route:** `POST /api/v1/auth/login`
+- **Interface / Route:** `<route/method>`
 - **Handler / Function:** `<file_path:lines>`
 - **Middleware / Interceptor:** `<file_path:lines>`
 
-## 3. C4 Component Architecture Diagram
+## 3. Visual Architecture & Workflow Diagrams
+
+### 3.1 C4 Component Architecture Diagram (Mandatory)
 ```mermaid
 C4Component
-    title Component Diagram for CAP-001: User Authentication
-    Container(client, "Inbound Client", "HTTP/RPC/Event", "External trigger source")
-    Component(entryPoint, "Entry Router / Handler", "Inbound Adapter", "Receives request")
-    Component(authService, "Domain Logic Engine", "Core Business Logic", "Validates rules")
-    Component(dataAdapter, "Data Access Layer", "Persistence Adapter", "Mutates database state")
-    ContainerDb(db, "Data Store", "Database / Storage", "Persists session state")
+title Component Diagram for <CAP-ID>: <Name>
+Container(client, "Inbound Client", "HTTP/RPC/Event", "External trigger source")
+Component(entryPoint, "Entry Router / Handler", "Inbound Adapter", "Receives request")
+Component(authService, "Domain Logic Engine", "Core Business Logic", "Validates rules")
+Component(dataAdapter, "Data Access Layer", "Persistence Adapter", "Mutates database state")
+ContainerDb(db, "Data Store", "Database / Storage", "Persists session state")
 
     Rel(client, entryPoint, "Triggers request")
     Rel(entryPoint, authService, "Delegates logic")
     Rel(authService, dataAdapter, "Requests state mutation")
     Rel(dataAdapter, db, "Reads/Writes state")
 ```
-4. Database Schema & State MutationsEntity / Table / StoreMutation TypeKey Fields MutatedSource Code Citationuser_sessionsINSERTsession_token, expires_at<file_path:lines>5. Behavior Scenarios (Gherkin BDD)Scenario: Valid Credentials SubmissionGiven a registered user with valid credentials (<file_path:lines>)When the login endpoint or function is executedThen return authorization token with successful status (<file_path:lines>)Evidence Citation: <file_path:lines>6. Failure & Error MatrixError ConditionTrigger RuleError / Status CodeEvidence CitationExpired Token / SessionTimestamp exceeds lifetime threshold401 Unauthorized / AuthException<file_path:lines>
-5. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
 
-**Spec Output Template ends here.**
+### 3.2 Sequence Diagram (Include if Multi-Step / Async / Multi-Service)
+```mermaid
+sequenceDiagram
+autonumber
+Client->>Handler: Request
+Handler->>Service: Validate & Execute
+Service-->>Database: Mutate State
+```
+
+### 3.3 Entity Relationship (ER) Diagram (Include if Schema / Database Touched)
+```mermaid
+erDiagram
+USERS ||--o{ ORDERS : places
+ORDERS {
+string id PK
+string status
+}
+```
+
+### 3.4 Decision Flowchart (Include if Complex Logic / Feature Flag Paths Exist)
+```mermaid
+flowchart TD
+A[Inbound Request] --> B{Feature Toggle ON?}
+B -- Yes --> C[Execute New Path]
+B -- No --> D[Execute Legacy Path]
+```
+
+## 4. Database Schema & State Mutations
+| Entity / Table / Store | Mutation Type | Key Fields Mutated | Source Code Citation |
+|---|---|---|---|
+| `<table_name>` | `<INSERT/UPDATE>` | `<fields>` | `<file_path:lines>` |
+
+## 5. Behavior Scenarios (Gherkin BDD)
+#### Scenario: <Scenario Name>
+- **Given** <precondition> (`<file_path:lines>`)
+- **When** <action>
+- **Then** <expected outcome> (`<file_path:lines>`)
+- **Evidence Citation:** `<file_path:lines>`
+
+## 6. Failure & Error Matrix
+| Error Condition | Trigger Rule | Error / Status Code | Evidence Citation |
+|---|---|---|---|
+| `<Error>` | `<Rule>` | `<Status>` | `<file_path:lines>` |
+
+[//]: # (template ends)
+
+# 6. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
 
 **Human Prompt (STOP HERE):**
 > "Phase 3 Complete: Written spec to target directory. Type another capability ID to analyze next, or type **'aggregate'** to run Phase 4."

@@ -37,3 +37,8 @@
     - **Sequence Diagrams:** For API calls, event pipelines, or state transitions.
     - **ER Diagrams:** For schema mutations or entity relationship updates.
     - **Flowcharts:** For complex decision trees or feature toggle branch paths.
+
+## 6. Output Completeness & Additional Value Principle
+- **Floor, Not a Ceiling:** All templates, tables, BDD scenarios, and diagram requirements represent the **STRICT MINIMUM** output expectation.
+- **Proactive Multi-Diagram Baseline Generation:** Never restrict output to high-level summaries or single C4 diagrams. If a capability slice involves database persistence, multi-service communication, state changes, or branching decisions, the agent MUST proactively generate additional diagrams (ER, Sequence, Flowchart) directly into the baseline `spec.md`.
+- **Zero Detail Reduction:** Additional relevant technical information, security constraints, performance notes, or edge cases are always welcomed; truncated or stripped-down outputs are strictly prohibited.
