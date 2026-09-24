@@ -3,18 +3,19 @@
 To prevent accidental data exfiltration or sending sensitive enterprise code to external LLM servers:
 
 ### 1. In-Memory Local Sanitization & Masking
-Before ANY source code, SQL script, schema file, or configuration file is processed or transmitted to an LLM prompt context, the agent MUST locally apply regex masking to sanitize the payload:
+Before ANY source code, SQL script, schema file, or configuration file is processed or transmitted to an LLM prompt context, the agent MUST locally apply regex masking to sanitize the payload while preserving exact source line numbers:
 - **API Keys & Credentials:** Passwords, private keys, database connection strings, tokens, secrets $\rightarrow$ `<REDACTED_SECRET>`
 - **Personal Identifiable Information (PII):**
     - National Identification / SSN / NRIC numbers $\rightarrow$ `S****123A`
     - Real Email addresses $\rightarrow$ `user@example.com`
     - Real Phone numbers $\rightarrow$ `+XX-XXXX-XXXX`
     - Real Names / Physical Addresses $\rightarrow$ Synthetic Mock Placeholders
+- **Local Logs Excluded:** All temporary pre-flight privacy diffs and logs written to `.openspec/preflight_logs/` MUST be ignored by Git.
 
 ### 2. Pre-Flight Pause & User Confirmation Gate
 Before making any API call or transmitting context to an external LLM server for Phase 3 (Capability Slicing):
 1. **List Files to be Sent:** Display the exact list of source files selected for analysis.
-2. **Show Sanitized Preview:** Show a brief diff/snippet proving secrets and PII have been masked.
+2. **Show Sanitized Preview:** Show a brief diff/snippet proving secrets and PII have been masked without altering source code line numbering.
 3. **HALT EXECUTION & ASK:**
    > ⚠️ **PRIVACY PRE-FLIGHT CHECK:**
    > I am about to send sanitized snippets of the following files to the LLM server:

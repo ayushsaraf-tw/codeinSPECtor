@@ -1,20 +1,21 @@
-### PHASE 3: Thin-Slice Analysis (Stack-Tailored Analysis & Dynamic Multi-Diagrams)
+# PHASE 3: Thin-Slice Analysis (Stack-Tailored Analysis & Dynamic Multi-Diagrams)
 **Condition:** User selects a capability ID from `CAPABILITIES_TREE.md`.
 
 **Action:**
-# 1. **State Guard:** Check selected capability status in `CAPABILITIES_TREE.md`.
+## 1. **State Guard:** Check selected capability status in `CAPABILITIES_TREE.md`.
    - **IF ALREADY COMPLETED:** HALT EXECUTION AND ASK:
      > 🛑 **STATE GUARD:** Capability `<id>` is currently marked as **Completed**.
      > Do you want to **re-analyze** and overwrite it, or **skip** and choose another capability?
-# 2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
-# 3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
-# 4. **Dynamic Diagram Selection Rule (Mandatory C4 + Contextual Diagrams):**
+## 2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
+## 3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
+## 4. **Dynamic Diagram Selection Rule (Mandatory C4 + Contextual Diagrams):**
    - **Always Include:** C4 Component Architecture Diagram (System & Module boundaries).
    - **If Data Persistence Included:** Append Mermaid **ER Diagram** (Entities, relationships, primary/foreign keys).
    - **If Multi-Service / Async / Event / API Handshake Included:** Append Mermaid **Sequence Diagram** (Inbound trigger, middleware, domain logic, external calls, async worker).
    - **If Complex Business Logic / Feature Toggles Included:** Append Mermaid **Flowchart** (Decision trees, branch paths, failure states).
+   - **Circular & Shared Boundary Handling:** When analyzing `CAP-A`, if it calls `CAP-B` and `CAP-B` calls `CAP-A`, DO NOT analyze `CAP-B` source code inline. Treat `CAP-B` as an external boundary call in Section 3 (Sequence Diagram), record `cyclic_dependencies: ["CAP-B"]` in frontmatter, and log the coupling in `RAID_LOG.md`. For `cap-000-*` infrastructure utilities, list them in `linked_capabilities` without re-analyzing utility source code.
 
-# 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
+## 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
 
 **Frontmatter Field Rules:**
 - `type`: Must be `capability_specification`.
@@ -30,6 +31,9 @@
 - `created_by`: Name of agent or developer (`codeinSPECtor`).
 - `linked_capabilities`: Array of directly coupled capability IDs (e.g., `[cap-002-user-profile]`). Must be `[]` if none.
 - `linked_issues`: Array of associated ticket/issue IDs (e.g., `[SEC-102]`). Must be `[]` if none.
+- `cyclic_dependencies`: Array of capability IDs that form a cyclic dependency with this capability. Must be `[]` if none.
+- `has_domain_leak`: Boolean indicating if this capability directly mutates state belonging to another domain. Must be `false` if none.
+- `leaked_domains`: Array of capability IDs that this capability mutates state for, if `has_domain_leak` is `true`. Must be `[]` if none.
 
 **Spec Output Template:**
 
@@ -49,13 +53,16 @@ created_at: 2026-09-24
 created_by: codeinSPECtor
 linked_capabilities: [cap-002-user-profile]
 linked_issues: []
+cyclic_dependencies: []
+has_domain_leak: false
+leaked_domains: []
 ---
 ```
 
 # Capability: <Capability Name>
 
 ## 1. Domain Purpose & Business Intent
-<High-level business capability summary>
+High-level business capability summary
 
 ## 2. Technical Entry Points & Security Gates
 - **Interface / Route:** `<route/method>`
@@ -126,7 +133,7 @@ B -- No --> D[Execute Legacy Path]
 
 [//]: # (template ends)
 
-# 6. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
+## 6. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
 
 **Human Prompt (STOP HERE):**
 > "Phase 3 Complete: Written spec to target directory. Type another capability ID to analyze next, or type **'aggregate'** to run Phase 4."

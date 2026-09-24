@@ -8,9 +8,10 @@
     - Output summary table mapping IDs, Semantic Names, Completion Status, Confidence Levels, per-capability spec links, and per-capability C4 diagram links.
     - Include direct link to `openspec/specs/SYSTEM_C4_DIAGRAM.md`.
 4. **Generate Dependency Map (`openspec/specs/DEPENDENCY_MAP.md`):**
-    - Aggregate shared data stores, direct service calls, and async events between capabilities into a Mermaid call graph.
+    - Aggregate shared data stores, direct service calls, async events, `cap-000-*` shared utility links, and `cyclic_dependencies` between capabilities into a Mermaid call graph.
+    - Visually highlight circular dependency loops and shared infrastructure nodes in distinct colors.
 5. **Generate RAID Spec (`openspec/specs/RAID_LOG.md`):**
-    - Aggregate all Risks, Assumptions, Known Issues, Technical Debt, and any unmasked legacy code warnings.
+    - Aggregate all Risks, Assumptions, Known Issues, Technical Debt, any unmasked legacy code warnings, flagged `has_domain_leak: true` slices, and circular dependency loops with refactoring priorities.
 6. **Compile Global Baseline (`openspec/specs/BASELINE.md`):**
     - **Global Domain Glossary:** Consolidated business terms across all capabilities.
     - **Consolidated Behavior Scenarios:** All Gherkin BDD scenarios grouped by capability.
@@ -25,7 +26,7 @@
 > - `openspec/specs/DEPENDENCY_MAP.md` (Cross-capability coupling graph)
 > - `openspec/specs/RAID_LOG.md` (Aggregated risks, assumptions & tech debt)
 >
-> **Next Steps - Choose an Option:**
+> **Next Steps – Choose an Option:**
 > 1. Type a remaining pending capability ID to continue reverse-engineering.
 > 2. Type **'render <client | architect | developer | agent>'** to generate a customized stakeholder view.
 > 3. Type **'proposal <feature-name>'** to set up a new native OpenSpec change proposal under `openspec/changes/`."
