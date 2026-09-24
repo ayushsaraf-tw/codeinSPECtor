@@ -30,7 +30,7 @@ Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs br
 
 const combinedParts = partFiles.map(file => {
   const filePath = path.join(partsDir, file);
-  return fs.readFileSync(filePath, 'utf8');
+  return fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n');
 }).join('\n\n---\n\n');
 
 const finalContent = header + combinedParts;

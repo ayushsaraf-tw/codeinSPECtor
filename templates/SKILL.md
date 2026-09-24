@@ -16,18 +16,19 @@ Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs br
 To prevent accidental data exfiltration or sending sensitive enterprise code to external LLM servers:
 
 ### 1. In-Memory Local Sanitization & Masking
-Before ANY source code, SQL script, schema file, or configuration file is processed or transmitted to an LLM prompt context, the agent MUST locally apply regex masking to sanitize the payload:
+Before ANY source code, SQL script, schema file, or configuration file is processed or transmitted to an LLM prompt context, the agent MUST locally apply regex masking to sanitize the payload while preserving exact source line numbers:
 - **API Keys & Credentials:** Passwords, private keys, database connection strings, tokens, secrets $\rightarrow$ `<REDACTED_SECRET>`
 - **Personal Identifiable Information (PII):**
     - National Identification / SSN / NRIC numbers $\rightarrow$ `S****123A`
     - Real Email addresses $\rightarrow$ `user@example.com`
     - Real Phone numbers $\rightarrow$ `+XX-XXXX-XXXX`
     - Real Names / Physical Addresses $\rightarrow$ Synthetic Mock Placeholders
+- **Local Logs Excluded:** All temporary pre-flight privacy diffs and logs written to `.openspec/preflight_logs/` MUST be ignored by Git.
 
 ### 2. Pre-Flight Pause & User Confirmation Gate
 Before making any API call or transmitting context to an external LLM server for Phase 3 (Capability Slicing):
 1. **List Files to be Sent:** Display the exact list of source files selected for analysis.
-2. **Show Sanitized Preview:** Show a brief diff/snippet proving secrets and PII have been masked.
+2. **Show Sanitized Preview:** Show a brief diff/snippet proving secrets and PII have been masked without altering source code line numbering.
 3. **HALT EXECUTION & ASK:**
    > ⚠️ **PRIVACY PRE-FLIGHT CHECK:**
    > I am about to send sanitized snippets of the following files to the LLM server:
@@ -40,7 +41,7 @@ Before making any API call or transmitting context to an external LLM server for
 ---
 
 ### PHASE 1: Broad System Reconnaissance (Fully Agnostic)
-**Condition:** `openspec/specs/SYSTEM_MAP.md` DOES NOT EXIST and command is NOT a proposal request.
+**Condition:** `openspec/specs/SYSTEM_MAP.md` DOES NOT EXIST.
 
 **Rule:** DO NOT assume any language, framework, or file extension upfront.
 
@@ -48,7 +49,8 @@ Before making any API call or transmitting context to an external LLM server for
 1. **Discover Ecosystem:** Inspect root directory for build definitions, manifests, and container configs (`package.json`, `pom.xml`, `build.gradle`, `go.mod`, `Cargo.toml`, `pyproject.toml`, `requirements.txt`, `Gemfile`, `Makefile`, `Dockerfile`, `docker-compose.yml`, etc.).
 2. **Discover Persistence Layer:** Locate migration directories, ORM schemas, SQL scripts, protobufs, or OpenAPI specifications regardless of folder structure.
 3. **Discover Entry Points:** Identify all entry mechanisms (HTTP handlers, RPC methods, event listeners, CLI interfaces, background jobs) purely from structural wiring.
-4. Output the discovered map to `openspec/specs/SYSTEM_MAP.md` and record the **`.detected_ecosystem`**.
+4. **Discover Shared Utilities & Infrastructure:** Identify shared helpers, base database clients, ORM abstractions, security utilities, and interceptors to catalog for `cap-000-*` extraction in Phase 2.
+5. Output the discovered map to `openspec/specs/SYSTEM_MAP.md` and record the **`.detected_ecosystem`**.
 
 **Output Schema (`openspec/specs/SYSTEM_MAP.md`):**
 ```markdown
@@ -67,53 +69,63 @@ entry_points_count: <number>
 - **Schemas / Migrations:** `<file-list>`
 - **Primary Source Paths:** `<directory-list>`
 
+## Shared Utilities & Infrastructure
+- **Shared Helpers & Middleware:** `<file-list>`
+
 ## Discovered Entry Points
 - `<protocol/type> <path/event/command>` -> `<Handler/Function>` (`file:lines`)
 ```
 
-Human Prompt (STOP HERE):
-
->"Phase 1 Complete: System Map written to openspec/specs/SYSTEM_MAP.md.
->Identified Ecosystem: <detected_ecosystem>
->Review entry points and type 'yes' to proceed to Phase 2."
+**Human Prompt (STOP HERE):**
+> "Phase 1 Complete: System Map written to openspec/specs/SYSTEM_MAP.md.
+> Identified Ecosystem: <detected_ecosystem>
+> Review entry points and type 'yes' to proceed to Phase 2."
 
 ---
 
-### PHASE 2: Capability Tree & Semantic Nesting (Adaptive)
+### PHASE 2: Capability Slicing & Nested Bounded Contexts
 **Condition:** `SYSTEM_MAP.md` EXISTS, but `openspec/specs/CAPABILITIES_TREE.md` DOES NOT EXIST.
 
 **Action:**
-1. Read `SYSTEM_MAP.md` and adopt specific conventions of the **`.detected_ecosystem`**.
-2. Group discovered entry points into business capabilities using semantic IDs: `cap-XXX-<short-business-slug>` (e.g., `cap-001-user-auth`).
-3. **Nested Slicing Rule:** If a capability touches >4 source files, split it into child sub-slices nested under the parent domain folder:
-   - **Parent Overview Spec:** `openspec/specs/cap-001-user-auth/spec.md` (Domain purpose, entry points router, and sub-slice directory index)
-   - **Child Sub-Slice 1:** `openspec/specs/cap-001-user-auth/cap-001a-token-validation/spec.md`
-   - **Child Sub-Slice 2:** `openspec/specs/cap-001-user-auth/cap-001b-session-persistence/spec.md`
-4. If a capability touches $\le$ 4 files, create a single spec at `openspec/specs/cap-XXX-<slug>/spec.md`.
-5. Write initial index to `openspec/specs/CAPABILITIES_TREE.md`.
+1. Read `SYSTEM_MAP.md` and identify primary business domains using semantic IDs: `cap-XXX-<short-business-slug>` (e.g., `cap-001-user-management`).
+2. **Extract Infrastructure Capabilities (`cap-000-*`):** Group shared database clients, middleware, ORM base abstractions, and logging helpers identified in Phase 1 into dedicated utility slices (`cap-000-common-<slug>`).
+3. **Slicing & Nesting Decision Matrix:**
+   - **Flat Capability (Standard):** If an entry point group represents a self-contained, single business context, create a single spec at `openspec/specs/cap-XXX-<slug>/spec.md`.
+   - **Nested Bounded Context (Complex / Leaky):** If a business domain contains multiple distinct sub-responsibilities, sprawling workflows, or **domain leaks** (e.g., Order Processing directly mutating Inventory and Payment state), decompose it into nested sub-bounded contexts:
+      - **Parent Context Overview:** `openspec/specs/cap-010-order-processing/spec.md` (Domain boundary overview, sub-slice index, and high-level routing).
+      - **Sub-Bounded Context 1:** `openspec/specs/cap-010-order-processing/cap-010a-payment-capture/spec.md`
+      - **Sub-Bounded Context 2 (Domain Leak Slice):** `openspec/specs/cap-010-order-processing/cap-010b-inventory-mutation/spec.md`
+
+4. **Domain Leak Identification:**
+   - For any sub-slice that directly accesses or mutates database tables, models, or state belonging to another domain, flag it as `has_domain_leak: true` in `CAPABILITIES_TREE.md`.
+
+5. Output the execution index to `openspec/specs/CAPABILITIES_TREE.md`.
 
 **Human Prompt (STOP HERE):**
-> "Phase 2 Complete: Capability Tree written to `openspec/specs/CAPABILITIES_TREE.md`. Which capability ID would you like to analyze first?"
+> "Phase 2 Complete: Capability Tree written to `openspec/specs/CAPABILITIES_TREE.md`.
+> Identified Bounded Contexts & Sub-Slices (including flagged domain leaks).
+> Which capability ID would you like to analyze first?"
 
 ---
 
-### PHASE 3: Thin-Slice Analysis (Stack-Tailored Analysis & Dynamic Multi-Diagrams)
+# PHASE 3: Thin-Slice Analysis (Stack-Tailored Analysis & Dynamic Multi-Diagrams)
 **Condition:** User selects a capability ID from `CAPABILITIES_TREE.md`.
 
 **Action:**
-# 1. **State Guard:** Check selected capability status in `CAPABILITIES_TREE.md`.
+## 1. **State Guard:** Check selected capability status in `CAPABILITIES_TREE.md`.
    - **IF ALREADY COMPLETED:** HALT EXECUTION AND ASK:
      > 🛑 **STATE GUARD:** Capability `<id>` is currently marked as **Completed**.
      > Do you want to **re-analyze** and overwrite it, or **skip** and choose another capability?
-# 2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
-# 3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
-# 4. **Dynamic Diagram Selection Rule (Mandatory C4 + Contextual Diagrams):**
+## 2. **Execute Pre-Flight Privacy Gate:** Display target files and sanitized diff preview. Wait for explicit user confirmation.
+## 3. Upon confirmation, read target source files (max 4 per pass) using framework-appropriate patterns derived from `SYSTEM_MAP.md`.
+## 4. **Dynamic Diagram Selection Rule (Mandatory C4 + Contextual Diagrams):**
    - **Always Include:** C4 Component Architecture Diagram (System & Module boundaries).
    - **If Data Persistence Included:** Append Mermaid **ER Diagram** (Entities, relationships, primary/foreign keys).
    - **If Multi-Service / Async / Event / API Handshake Included:** Append Mermaid **Sequence Diagram** (Inbound trigger, middleware, domain logic, external calls, async worker).
    - **If Complex Business Logic / Feature Toggles Included:** Append Mermaid **Flowchart** (Decision trees, branch paths, failure states).
+   - **Circular & Shared Boundary Handling:** When analyzing `CAP-A`, if it calls `CAP-B` and `CAP-B` calls `CAP-A`, DO NOT analyze `CAP-B` source code inline. Treat `CAP-B` as an external boundary call in Section 3 (Sequence Diagram), record `cyclic_dependencies: ["CAP-B"]` in frontmatter, and log the coupling in `RAID_LOG.md`. For `cap-000-*` infrastructure utilities, list them in `linked_capabilities` without re-analyzing utility source code.
 
-# 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
+## 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
 
 **Frontmatter Field Rules:**
 - `type`: Must be `capability_specification`.
@@ -129,6 +141,9 @@ Human Prompt (STOP HERE):
 - `created_by`: Name of agent or developer (`codeinSPECtor`).
 - `linked_capabilities`: Array of directly coupled capability IDs (e.g., `[cap-002-user-profile]`). Must be `[]` if none.
 - `linked_issues`: Array of associated ticket/issue IDs (e.g., `[SEC-102]`). Must be `[]` if none.
+- `cyclic_dependencies`: Array of capability IDs that form a cyclic dependency with this capability. Must be `[]` if none.
+- `has_domain_leak`: Boolean indicating if this capability directly mutates state belonging to another domain. Must be `false` if none.
+- `leaked_domains`: Array of capability IDs that this capability mutates state for, if `has_domain_leak` is `true`. Must be `[]` if none.
 
 **Spec Output Template:**
 
@@ -148,13 +163,16 @@ created_at: 2026-09-24
 created_by: codeinSPECtor
 linked_capabilities: [cap-002-user-profile]
 linked_issues: []
+cyclic_dependencies: []
+has_domain_leak: false
+leaked_domains: []
 ---
 ```
 
 # Capability: <Capability Name>
 
 ## 1. Domain Purpose & Business Intent
-<High-level business capability summary>
+High-level business capability summary
 
 ## 2. Technical Entry Points & Security Gates
 - **Interface / Route:** `<route/method>`
@@ -225,7 +243,7 @@ B -- No --> D[Execute Legacy Path]
 
 [//]: # (template ends)
 
-# 6. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
+## 6. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
 
 **Human Prompt (STOP HERE):**
 > "Phase 3 Complete: Written spec to target directory. Type another capability ID to analyze next, or type **'aggregate'** to run Phase 4."
@@ -242,9 +260,10 @@ B -- No --> D[Execute Legacy Path]
     - Output summary table mapping IDs, Semantic Names, Completion Status, Confidence Levels, per-capability spec links, and per-capability C4 diagram links.
     - Include direct link to `openspec/specs/SYSTEM_C4_DIAGRAM.md`.
 4. **Generate Dependency Map (`openspec/specs/DEPENDENCY_MAP.md`):**
-    - Aggregate shared data stores, direct service calls, and async events between capabilities into a Mermaid call graph.
+    - Aggregate shared data stores, direct service calls, async events, `cap-000-*` shared utility links, and `cyclic_dependencies` between capabilities into a Mermaid call graph.
+    - Visually highlight circular dependency loops and shared infrastructure nodes in distinct colors.
 5. **Generate RAID Spec (`openspec/specs/RAID_LOG.md`):**
-    - Aggregate all Risks, Assumptions, Known Issues, Technical Debt, and any unmasked legacy code warnings.
+    - Aggregate all Risks, Assumptions, Known Issues, Technical Debt, any unmasked legacy code warnings, flagged `has_domain_leak: true` slices, and circular dependency loops with refactoring priorities.
 6. **Compile Global Baseline (`openspec/specs/BASELINE.md`):**
     - **Global Domain Glossary:** Consolidated business terms across all capabilities.
     - **Consolidated Behavior Scenarios:** All Gherkin BDD scenarios grouped by capability.
@@ -259,7 +278,7 @@ B -- No --> D[Execute Legacy Path]
 > - `openspec/specs/DEPENDENCY_MAP.md` (Cross-capability coupling graph)
 > - `openspec/specs/RAID_LOG.md` (Aggregated risks, assumptions & tech debt)
 >
-> **Next Steps - Choose an Option:**
+> **Next Steps – Choose an Option:**
 > 1. Type a remaining pending capability ID to continue reverse-engineering.
 > 2. Type **'render <client | architect | developer | agent>'** to generate a customized stakeholder view.
 > 3. Type **'proposal <feature-name>'** to set up a new native OpenSpec change proposal under `openspec/changes/`."
@@ -269,8 +288,8 @@ B -- No --> D[Execute Legacy Path]
 ### OPTIONAL PHASE: Multi-Stakeholder View Generation
 **Condition:** User requests **'render <view-type>'** after baseline aggregation or proposal creation.
 
-**Action:** Render customized, audience-specific perspectives derived strictly from `BASELINE.md` and `SYSTEM_C4_DIAGRAM.md`:
-- **`render client` / `render ba`:** Renders non-technical business executive summary, user impact, compliance rules, and plain-language Gherkin scenarios (hides internal code/file citations).
-- **`render architect`:** Renders system boundary map, Master C4 diagrams, Mermaid coupling sequence diagrams, global failure recovery strategies, and high-priority RAID risks.
-- **`render developer`:** Renders consolidated data schema mutations, field constraints, test coverage gaps, local seed requirements, and exact file:line citations.
-- **`render agent`:** Renders pure machine-readable YAML/JSON frontmatter schemas and deterministic behavior stubs for TDD modernization.
+**Action:** Render customized, audience-specific perspectives derived strictly from `BASELINE.md`, `CONVENTIONS.md`, and `SYSTEM_C4_DIAGRAM.md`:
+- **`render client` / `render ba`:** Renders non-technical business executive summary, user impact, compliance rules, domain glossary, and plain-language Gherkin scenarios (hides internal code/file citations).
+- **`render architect`:** Renders system boundary map, Master C4 diagrams, Mermaid coupling sequence diagrams, cyclic dependency loops, flagged domain leaks (`has_domain_leak: true`), shared `cap-000-*` utility topology, global failure recovery strategies, and high-priority RAID risks.
+- **`render developer`:** Renders consolidated data schema mutations, ER diagrams, field constraints, test coverage gaps, local seed requirements, TDD commit sequencing, dual-state feature toggle testing targets (ON/OFF paths), and exact `file:lines` citations.
+- **`render agent`:** Renders pure machine-readable YAML/JSON frontmatter schemas, deterministic BDD scenarios, and fitness function stubs (e.g., ArchUnit rules) for TDD modernization and automated prompt execution.

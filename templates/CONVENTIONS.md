@@ -38,7 +38,11 @@
     - **ER Diagrams:** For schema mutations or entity relationship updates.
     - **Flowcharts:** For complex decision trees or feature toggle branch paths.
 
-## 6. Output Completeness & Additional Value Principle
+## 6. Architectural Dependencies, Utilities & Cyclic Coupling
+- **Infrastructure / Shared Utilities (`cap-000-*`):** Common helpers, ORM base models, middleware, and shared utility modules MUST be extracted as `cap-000-common-<slug>` capabilities. Domain capabilities reference them via frontmatter (`linked_capabilities`) rather than re-analyzing their internal code.
+- **Cyclic Dependency Boundaries:** When two domain capabilities depend on each other, treat the external call as a black-box boundary. Record `cyclic_dependencies: ["cap-XXX-slug"]` in frontmatter and log the coupling risk in `RAID_LOG.md`.
+
+## 7. Output Completeness & Additional Value Principle
 - **Floor, Not a Ceiling:** All templates, tables, BDD scenarios, and diagram requirements represent the **STRICT MINIMUM** output expectation.
 - **Proactive Multi-Diagram Baseline Generation:** Never restrict output to high-level summaries or single C4 diagrams. If a capability slice involves database persistence, multi-service communication, state changes, or branching decisions, the agent MUST proactively generate additional diagrams (ER, Sequence, Flowchart) directly into the baseline `spec.md`.
 - **Zero Detail Reduction:** Additional relevant technical information, security constraints, performance notes, or edge cases are always welcomed; truncated or stripped-down outputs are strictly prohibited.
