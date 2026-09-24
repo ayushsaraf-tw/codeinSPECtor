@@ -26,8 +26,12 @@ const conventionsTemplate = path.resolve(__dirname, '..', 'templates', 'CONVENTI
 const targetConventionsPath = path.join('openspec', 'specs', 'CONVENTIONS.md');
 
 if (fs.existsSync(conventionsTemplate)) {
-  fs.copyFileSync(conventionsTemplate, targetConventionsPath);
-  console.log("📋 Deployed engineering standards to openspec/specs/CONVENTIONS.md");
+  if (!fs.existsSync(targetConventionsPath)) {
+    fs.copyFileSync(conventionsTemplate, targetConventionsPath);
+    console.log("📋 Deployed engineering standards to openspec/specs/CONVENTIONS.md");
+  } else {
+    console.warn("ℹ️ Existing openspec/specs/CONVENTIONS.md detected. Skipping overwrite.");
+  }
 }
 
 // 3. Update .gitignore for temporary analysis artifacts
