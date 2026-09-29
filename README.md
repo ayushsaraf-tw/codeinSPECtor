@@ -2,6 +2,25 @@
 
 **CodeinSPECtor** is an OpenSpec-native reverse-engineering engine and engineering convention enforcer for legacy codebases. It provides a stateful, human-in-the-loop workflow (`/opsx:build-baseline`) that extracts evidence-grounded specifications into a single source of truth without overflowing LLM context windows, while enforcing shift-left TDD, trunk-based delivery, and quality guardrails across day-to-day OpenSpec proposals.
 
+## 🧠 New to AI Coding Agents & OpenSpec? Start Here!
+
+### What is an AI Coding Agent?
+An AI coding agent (like Cursor Agent, Claude Code, GitHub Copilot, or Gemini CLI) is not just a text generator—it is an LLM running tools in a loop to read files, execute CLI commands, and write code.
+
+However, unguided AI agents suffer from **Context Window Collapse**:
+- They cannot see your entire repository at once.
+- Long conversation threads cause memory drift, leading to hallucinated line numbers and missing error handling ("AI Slop").
+
+---
+
+### What is OpenSpec & codeinSPECtor?
+**OpenSpec** is an open standard that shifts AI coding left. Instead of letting an agent edit source code directly from a vague prompt, OpenSpec forces the agent to create a structured specification first:
+1. `proposal.md` — What are we building and why?
+2. `design.md` — What interfaces, database schemas, and 4-state UI patterns are required?
+3. `tasks.md` — What is the Red-Green-Refactor TDD task sequence?
+
+**`codeinSPECtor`** is our team scaffolding built on top of OpenSpec. It deploys our team's engineering standards (`CONVENTIONS.md`) directly into your project, automates legacy repository reverse-engineering in 2 weeks, and enforces interface-first design, zero-trust security, and dual-state feature toggles across every AI assistant.
+
 ---
 
 ## 🚀 Quick Start for Legacy Repositories
@@ -108,11 +127,13 @@ Phase 4: Master Baseline Consolidation, C4 System Context & RAID Log
 
 Once your baseline is generated, day-to-day development transitions seamlessly to standard native OpenSpec CLI commands (`openspec-propose`, `openspec-apply`). `codeinSPECtor` automatically enforces team development practices across these commands:
 
+* **Proposal Sizing & Fast-Track Execution:** Dynamically sizes requirements based on scope (`major_feature`, `minor_feature`, `refactor_internal`). Internal refactors bypass UI/Infra templates and feature toggle requirements, generating an agile, 2-step TDD task plan.
+* **Interface-First & SOLID Architecture:** Requires coding to abstract interfaces rather than concrete implementations, wrapping external APIs and ORM abstractions behind Hexagonal Ports & Adapters.
+* **Modern UI & 4-State Defensive Pattern:** Mandates atomic component separation, custom hook logic extraction, and mandatory 4-state UI handling (**Idle**, **Loading**, **Success**, **Error/Empty with retry**) for all async components.
+* **Async Resilience & Zero-Trust Security:** Enforces boundary schema validation (Zod/Pydantic), fail-secure error masking, client idempotency keys (`X-Idempotency-Key`), exponential backoff retries, and structured JSON tracing (`trace_id`, `span_id`).
 * **Shift-Left Constraint Discovery & RAIDD:** Capability constraints, breaking changes, and cross-service risks are called out during `proposal.md` drafting—long before writing code.
 * **TDD & Trunk-Based Commit Ordering:** Enforces Red-Green-Refactor cycles. Tasks are structured into small, testable commits where tests and core logic land first, followed by the feature flag.
-* **Dual-State Feature Toggle Testing:** Requires explicit test coverage verifying that when a toggle is **OFF**, legacy functionality operates 100% regression-free.
 * **Output Completeness ("Floor, Not a Ceiling"):** All templates, tables, BDD scenarios, and diagram rules represent the absolute minimum expectation. Truncated or stripped-down outputs are strictly prohibited.
-* **Fitness Functions & Clean Code:** Mandates checking or adding architectural fitness function rules (e.g., ArchUnit) and aligning refactoring with *Refactoring.Guru* patterns.
 
 ---
 
@@ -130,7 +151,7 @@ your-legacy-repo/
 │       └── openspec-apply/         <-- Patched to enforce CONVENTIONS.md
 └── openspec/
 └── specs/
-├── CONVENTIONS.md          <-- Canonical engineering, TDD & feature flag rules
+├── CONVENTIONS.md          <-- Canonical engineering, TDD, UI & Fast-Track rules
 ├── SYSTEM_MAP.md           <-- Discovered ecosystem entry points & package scopes
 ├── CAPABILITIES_TREE.md    <-- Capability slicing index & status
 ├── INDEX.md                <-- Central navigation index & confidence levels

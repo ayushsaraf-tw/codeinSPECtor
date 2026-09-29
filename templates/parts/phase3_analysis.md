@@ -14,8 +14,10 @@
    - **ER Diagram:** Include if data persistence, tables, or ORM entity relationships are touched.
    - **Flowchart:** Include if complex branching logic, decision trees, or feature flag paths exist.
    - **Circular & Shared Boundary Handling:** When analyzing \`CAP-A\`, if it calls \`CAP-B\` and \`CAP-B\` calls \`CAP-A\`, DO NOT analyze \`CAP-B\` source code inline. Treat \`CAP-B\` as an external boundary call in Section 3 (Sequence Diagram), record \`cyclic_dependencies: ["CAP-B"]\` in frontmatter, and log the coupling in \`RAID_LOG.md\`. For \`cap-000-*\` infrastructure utilities, list them in \`linked_capabilities\` without re-analyzing utility source code.
-
-## 5. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
+## 5 Self-Critique & Anti-Loop Guardrail (Ralph Loop Validation)
+- **Line Citation Verification:** Double-check every `file_path:lines` citation against the raw source code pass. If a line shift is detected, correct it immediately before outputting the final `spec.md`.
+- **Loop Break Rule:** If an unverified assumption or missing dependency cannot be resolved after 2 reading attempts, DO NOT guess or hallucinate. Mark `confidence_level: needs_confirmation`, set `status: pending_approval`, document the gap in `unverified_assumptions: [...]`, and flag it in `RAID_LOG.md`.
+## 6. Generate target `spec.md` using exact code line citations and embedded Mermaid diagrams:
 
 **Frontmatter Field Rules:**
 - `type`: Must be `capability_specification`.
@@ -133,7 +135,7 @@ B -- No --> D[Execute Legacy Path]
 
 [//]: # (template ends)
 
-## 6. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
+## 7. Update status in `openspec/specs/CAPABILITIES_TREE.md` to `Completed` (or `Pending approval` if confidence is low).
 
 **Human Prompt (STOP HERE):**
 > "Phase 3 Complete: Written spec to target directory. Type another capability ID to analyze next, or type **'aggregate'** to run Phase 4."
