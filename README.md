@@ -43,7 +43,7 @@ npx git+https://github.com/ayushsaraf-tw/codeinSPECtor.git init
 *(Note: If the repository is private, ensure your Git SSH credentials are configured).*
 
 This command automatically:
-- Initializes native OpenSpec (`.openspec/` and `openspec/specs/`) if missing.
+- Runs native OpenSpec initialization if neither `openspec/` nor `.openspec/` exists, and always ensures `openspec/specs/` exists before deploying templates. If native initialization fails, it warns and continues with local directories and codeinSPECtor skills; native OpenSpec setup may still be incomplete.
 - Deploys team engineering standards to `openspec/specs/CONVENTIONS.md` (preserves existing custom conventions if present).
 - Updates `.gitignore` to exclude temporary analysis artifacts and pre-flight privacy logs.
 - Patches existing OpenSpec lifecycle skills (`openspec-propose`, `openspec-apply`) to enforce your engineering conventions.

@@ -11,15 +11,15 @@ const CURRENT_VERSION = pkg.version;
 console.log(`🔍 Initializing codeinSPECtor v${CURRENT_VERSION}...`);
 
 // 1. Initialize OpenSpec directory structure if missing
-if (!fs.existsSync('.openspec')) {
+if (!fs.existsSync('openspec') && !fs.existsSync('.openspec')) {
   try {
     execSync('npx openspec init', { stdio: 'inherit' });
   } catch (err) {
-    fs.mkdirSync('.openspec/specs', { recursive: true });
+    console.warn(`⚠️ OpenSpec initialization failed: ${err.message}`);
+    console.warn('Continuing with local directory and codeinSPECtor skill setup only; native OpenSpec setup may be incomplete.');
   }
-} else if (!fs.existsSync('openspec/specs')) {
-  fs.mkdirSync('openspec/specs', { recursive: true });
 }
+fs.mkdirSync(path.join('openspec', 'specs'), { recursive: true });
 
 // 2. Deploy canonical openspec/specs/CONVENTIONS.md
 const conventionsTemplate = path.resolve(__dirname, '..', 'templates', 'CONVENTIONS.md');
