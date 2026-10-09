@@ -4,23 +4,22 @@ To prevent accidental data exfiltration or sending sensitive enterprise code to 
 
 ### 1. In-Memory Local Sanitization & Masking
 Before ANY source code, SQL script, schema file, or configuration file is processed or transmitted to an LLM prompt context, the agent MUST locally apply regex masking to sanitize the payload while preserving exact source line numbers:
-- **API Keys & Credentials:** Passwords, private keys, database connection strings, tokens, secrets $\rightarrow$ `<REDACTED_SECRET>`
-- **Personal Identifiable Information (PII):**
-    - National Identification / SSN / NRIC numbers $\rightarrow$ `S****123A`
-    - Real Email addresses $\rightarrow$ `user@example.com`
-    - Real Phone numbers $\rightarrow$ `+XX-XXXX-XXXX`
-    - Real Names / Physical Addresses $\rightarrow$ Synthetic Mock Placeholders
+- **API Keys & Credentials:** Passwords, private keys, database connection strings, tokens, secrets → `<REDACTED_SECRET>`
+- **Personal Identifiable Information (PII / IM8 Alignment):**
+    - Singapore NRIC / FIN / SSN → `S****123A` / `T****567B`
+    - Real Email addresses → `user@example.com`
+    - Real Phone numbers → `+65-XXXX-XXXX`
+    - Real Names / Physical Addresses → Synthetic Mock Placeholders
 - **Local Logs Excluded:** All temporary pre-flight privacy diffs and logs written to `.openspec/preflight_logs/` MUST be ignored by Git.
 
-### 2. Pre-Flight Pause & User Confirmation Gate
-Before making any API call or transmitting context to an external LLM server for Phase 3 (Capability Slicing):
-1. **List Files to be Sent:** Display the exact list of source files selected for analysis.
-2. **Show Sanitized Preview:** Show a brief diff/snippet proving secrets and PII have been masked without altering source code line numbering.
-3. **HALT EXECUTION & ASK:**
-   > ⚠️ **PRIVACY PRE-FLIGHT CHECK:**
-   > I am about to send sanitized snippets of the following files to the LLM server:
-   > - `<file_1>`
-   > - `<file_2>`
-   >
-   > All credentials, keys, and PII have been masked locally.
-   > Type **'yes'** or **'confirm'** to proceed, or type **'cancel'** to abort the request.
+### 2. Conditional Pre-Flight User Confirmation Gate
+Run local in-memory sanitization before transmitting file context for Phase 3 (Capability Slicing):
+- **AUTOMATIC PROCEED (No Threat / No Secret Detected):** If the local scan reveals **zero** credentials, secrets, PII, or security threats, **PROCEED AUTOMATICALLY** with analysis without pausing to ask the user.
+- **CONDITIONAL PAUSE (Secret Masked or Threat Detected):** If the scan detects and masks PII/secrets or identifies a security threat,
+- **HALT EXECUTION & ASK**:
+  > ⚠️ **PRIVACY PRE-FLIGHT CHECK (Sensitive Items Masked / Threat Flagged):**
+  > I detected sensitive data/threats in the target files. Masking applied:
+  > - `<file_1>`: Redacted secret/PII on line(s) `<lines>`
+  > - `<file_2>`: `<detected_threat_type>`
+  >
+  > Review the sanitized preview. Type **'yes'**, **'confirm'**, or **'approve'** to proceed, or **'cancel'** to abort.

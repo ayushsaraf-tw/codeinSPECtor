@@ -21,10 +21,12 @@ command: /opsx:build-baseline
 
 # OpenSpec Custom Skill: /opsx:build-baseline
 
-## Description
-Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs broad, framework-agnostic system reconnaissance, locks in the detected stack, generates nested capability specifications, C4 diagrams, and multi-stakeholder views while enforcing pre-flight privacy guardrails and team engineering conventions.
+> ⚡ **DIRECT EXECUTION INSTRUCTION:**
+> Whenever this file is referenced or \`/opsx:build-baseline\` is invoked, you MUST immediately execute the current active Phase or render command.
+> DO NOT summarize this file, DO NOT ask meta-questions, and DO NOT output conversational filler. Execute immediately.
 
----
+## Description
+Stateful, human-in-the-loop reverse engineering engine for OpenSpec. Performs broad, framework-agnostic system reconnaissance, locks in the detected stack, generates nested capability specifications, C4 diagrams, and multi-stakeholder views while enforcing conditional pre-flight privacy guardrails and team engineering conventions.
 
 `;
 
